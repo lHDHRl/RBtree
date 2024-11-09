@@ -1,5 +1,5 @@
 # Название исполнимого файла
-TARGET = my_program
+TARGET = main.cpp
 
 # Компилятор
 CXX = g++
