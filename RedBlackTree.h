@@ -3,7 +3,8 @@
 
 #include <iostream>
 #include <string>
-#include <src/LinkedList.h>
+#include "src/LinkedList.h"
+
 
 enum Color { RED, BLACK };
 

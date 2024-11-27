@@ -2,3 +2,4 @@ data.txt
 main.exe
 main.o
 RedBlackTree.o
+src/LinkedList.o

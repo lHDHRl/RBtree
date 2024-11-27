@@ -8,7 +8,7 @@ CXX = g++
 CXXFLAGS = -std=c++17 -Wall
 
 # Все исходные файлы (.cpp) в проекте
-SRC = main.cpp RedBlackTree.cpp src/linkedList.cpp
+SRC = main.cpp RedBlackTree.cpp src/LinkedList.cpp
 
 # Все объектные файлы (.o)
 OBJ = $(SRC:.cpp=.o)

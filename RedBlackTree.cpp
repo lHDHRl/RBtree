@@ -6,6 +6,7 @@
 #include <stdexcept>
 
 
+
 RedBlackTree::RedBlackTree() : root(NULL) {}
 
 RedBlackTree::~RedBlackTree() {

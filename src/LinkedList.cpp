@@ -4,9 +4,9 @@ linkedList::linkedList() : head{ NULL }, last{ NULL }, size{ 0 } {}
 
 linkedList::~linkedList() {
     if (!head) return;
-    Node* curr = head->next;
+    lNode* curr = head->next;
     while (curr != head) {
-        Node* temp = curr;
+        lNode* temp = curr;
         curr = curr->next;
         delete temp;
     }
@@ -15,7 +15,7 @@ linkedList::~linkedList() {
 }
 
 void linkedList::add(int x) {
-    Node* temp = new Node{ x, NULL };
+    lNode* temp = new lNode{ x, NULL };
     if (!head) {
         head = last = temp;
         temp->next = head;
@@ -26,8 +26,8 @@ void linkedList::add(int x) {
         last->next = head;
     }
     else {
-        Node* curr = head->next;
-        Node* prev = head;
+        lNode* curr = head->next;
+        lNode* prev = head;
         while (curr != head && curr->value > x) {
             prev = curr;
             curr = curr->next;
@@ -46,7 +46,7 @@ void linkedList::show() {
         std::cout << "Список пуст.\n";
         return;
     }
-    Node* temp = head;
+    lNode* temp = head;
     do {
         std::cout << temp->value << " ";
         temp = temp->next;
@@ -64,7 +64,7 @@ void linkedList::removeAll(int x) {
             size--;
             return;
         }
-        Node* temp = head;
+        lNode* temp = head;
         head = head->next;
         last->next = head;
         delete temp;
@@ -73,10 +73,10 @@ void linkedList::removeAll(int x) {
 
     if (!head) return;
 
-    Node* curr = head;
+    lNode* curr = head;
     do {
         if (curr->next->value == x) {
-            Node* temp = curr->next;
+            lNode* temp = curr->next;
             curr->next = temp->next;
             if (temp == last) last = curr;
             delete temp;
@@ -92,8 +92,8 @@ void linkedList::removeAll(int x) {
 linkedList* linkedList::inAddition() {
     linkedList* list3 = new linkedList;
     if (size % 2 == 0) {
-        Node* curr = head->next;
-        Node* prev = head;
+        lNode* curr = head->next;
+        lNode* prev = head;
         do {
             list3->add(prev->value + curr->value);
             prev = curr->next;
@@ -101,8 +101,8 @@ linkedList* linkedList::inAddition() {
         } while (curr != head && curr != head->next);
     }
     else {
-        Node* curr = head->next;
-        Node* prev = head;
+        lNode* curr = head->next;
+        lNode* prev = head;
         do {
             list3->add(prev->value + curr->value);
             prev = curr->next;
@@ -117,7 +117,7 @@ linkedList* linkedList::inAddition() {
 
 int linkedList::search(int x) {
     if (!head) return -1;
-    Node* curr = head;
+    lNode* curr = head;
     int index = 0;
     do {
         if (curr->value == x) return index;
@@ -130,10 +130,10 @@ int linkedList::search(int x) {
 void linkedList::removeAfter(int value) {
     if (!head) return;
 
-    Node* curr = head;
+    lNode* curr = head;
     do {
         if (curr->value == value) {
-            Node* temp = curr->next;
+            lNode* temp = curr->next;
 
             if (temp == head) {
                 head = head->next;
@@ -155,7 +155,7 @@ void linkedList::removeAfter(int value) {
 
 bool linkedList::existsinList(int value) {
     if (!head) return false;
-    Node* temp = head;
+    lNode* temp = head;
     do {
         if (temp->value == value) return true;
         temp = temp->next;
@@ -166,16 +166,16 @@ bool linkedList::existsinList(int value) {
 void linkedList::merge(linkedList& secondList) {
     if (!head || !secondList.head) return;
 
-    Node* curr = secondList.head;
+    lNode* curr = secondList.head;
     do {
         add(curr->value);
         curr = curr->next;
     } while (curr != secondList.head);
 
     secondList.last->next = NULL;
-    Node* temp = secondList.head;
+    lNode* temp = secondList.head;
     while (temp) {
-        Node* next = temp->next;
+        lNode* next = temp->next;
         delete temp;
         temp = next;
     }

@@ -3,14 +3,14 @@
 
 #include <iostream>
 
-struct Node {
+struct lNode {
     int value;
-    Node* next;
+    lNode* next;
 };
 
 class linkedList {
-    Node* head;
-    Node* last;
+    lNode* head;
+    lNode* last;
     int size;
 
 public:
