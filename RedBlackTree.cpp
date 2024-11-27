@@ -1,7 +1,18 @@
 #include "RedBlackTree.h"
+#include <fstream>
+#include <sstream>
+#include <iostream>
 #include <string>
+#include <stdexcept>
+
 
 RedBlackTree::RedBlackTree() : root(NULL) {}
+
+RedBlackTree::~RedBlackTree() {
+    deleteTree(root);  
+    std::cout<< "Капитан, дерево уничтожено!";
+}
+
 Node::Node(GroupNumber group) : group(group), color(RED), left(NULL), right(NULL), parent(NULL) {}
 
 void RedBlackTree::rotateLeft(Node*& root, Node*& node) {
@@ -97,21 +108,49 @@ void RedBlackTree::fixInsert(Node*& root, Node*& node) {
     root->color = BLACK;
 }
 
+// Функция для получения числового значения типа программы
+int programTypeToInt(char programType) {
+    if (programType == 'B')
+        return 1;
+    else if (programType == 'M')
+        return 2;
+    else if (programType == 'S')
+        return 3;
+    else
+        return 0;  
+}
+
 Node* RedBlackTree::BSTInsert(Node* root, Node* node) {
     if (root == NULL)
         return node;
+    // WIP, Пока не правильная логика
+    // Сравнение по числовому значению типа программы
+    int nodeTypeValue = programTypeToInt(node->group.programType);
+    int rootTypeValue = programTypeToInt(root->group.programType);
 
-    if (node->group.groupID < root->group.groupID) {
+    if (nodeTypeValue < rootTypeValue) {
         root->left = BSTInsert(root->left, node);
         root->left->parent = root;
     }
-    else if (node->group.groupID > root->group.groupID) {
+    else if (nodeTypeValue > rootTypeValue) {
         root->right = BSTInsert(root->right, node);
         root->right->parent = root;
+    }
+    else {
+        // Если тип программы одинаковый, сравниваем по groupID
+        if (node->group.groupID < root->group.groupID) {
+            root->left = BSTInsert(root->left, node);
+            root->left->parent = root;
+        }
+        else if (node->group.groupID > root->group.groupID) {
+            root->right = BSTInsert(root->right, node);
+            root->right->parent = root;
+        }
     }
 
     return root;
 }
+
 
 void RedBlackTree::insert(char programType, int groupID) {
     GroupNumber group(programType, groupID);
@@ -142,4 +181,57 @@ void RedBlackTree::inOrderHelper(Node* root) {
 
 void RedBlackTree::inOrder() {
     inOrderHelper(root);
+}
+
+bool isValidProgramType(char programType) {
+    return (programType == 'B' || programType == 'M' || programType == 'S');
+}
+
+void RedBlackTree::loadFromFile(const std::string& filename) {
+
+    std::ifstream inputFile(filename);  // Используем ifstream для чтения обычных символов
+    if (!inputFile) {
+        std::cerr << "Ошибка открытия файла!" << std::endl;
+        return;
+    }
+
+    std::string line;
+    while (std::getline(inputFile, line)) {  // Считываем файл построчно
+        std::istringstream iss(line);
+        char programType;
+        int groupID;
+
+        std::cout << "Считали строку: " << line << std::endl;  // Выводим считанную строку
+
+        if (iss >> programType >> groupID) {
+            if (!isValidProgramType(programType)) {
+                std::cerr << "Ошибка: Недопустимый тип программы в строке: " << line << std::endl;
+                continue;
+            }
+
+            if (groupID < 1000 || groupID > 9999) {
+                std::cerr << "Ошибка: Номер группы должен быть четырёхзначным числом в строке: " << line << std::endl;
+                continue;
+            }
+
+            insert(programType, groupID);
+        } else {
+            std::cerr << "Ошибка чтения строки: " << line << std::endl;
+        }
+    }
+
+    inputFile.close();
+}
+
+
+
+void RedBlackTree::deleteTree(Node* node) {
+    if (node == NULL)
+        return;
+
+    // Рекурсивно удаляем левого и правого потомков
+    deleteTree(node->left);
+    deleteTree(node->right);
+
+    delete node;  // Удаляем текущий узел
 }

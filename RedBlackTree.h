@@ -2,6 +2,8 @@
 #define RED_BLACK_TREE_H
 
 #include <iostream>
+#include <string>
+#include <src/LinkedList.h>
 
 enum Color { RED, BLACK };
 
@@ -13,26 +15,29 @@ struct GroupNumber {
 };
 
 struct Node {
-  GroupNumber group;
-  Color color;
-  Node *left, *right, *parent;
+    GroupNumber group;
+    Color color;
+    Node* left, * right, * parent;
+    linkedList DuplicateList;
 
-  Node(GroupNumber group);
+    Node(GroupNumber group);
 };
 
 class RedBlackTree {
- private:
-  Node *root;
-
-  void rotateLeft(Node*& root, Node*& node);
-  void rotateRight(Node*& root, Node*& node);
-  void fixInsert(Node*& root, Node*& node);
-  Node* BSTInsert(Node* root, Node* node);
-  void inOrderHelper(Node* root);
+private:
+    Node* root;
+    void rotateLeft(Node*& root, Node*& node);
+    void rotateRight(Node*& root, Node*& node);
+    void fixInsert(Node*& root, Node*& node);
+    Node* BSTInsert(Node* root, Node* node);
+    void inOrderHelper(Node* root);
 public:
+    void deleteTree(Node* node);  
+    ~RedBlackTree();  
     RedBlackTree();
     void insert(char programType, int groupID);
     void inOrder();
+    void loadFromFile(const std::string& filename);
 };
 
 #endif
