@@ -32,11 +32,14 @@ private:
     void fixInsert(Node*& root, Node*& node);
     Node* BSTInsert(Node* root, Node* node);
     void inOrderHelper(Node* root);
+    void showTreeHelper(Node* root, int level);
 public:
+    Node* getRoot();
+    void showTree();
     void deleteTree(Node* node);  
     ~RedBlackTree();  
     RedBlackTree();
-    void insert(char programType, int groupID);
+    void insert(char programType, int groupID,int lineNumber);
     void inOrder();
     void loadFromFile(const std::string& filename);
 };

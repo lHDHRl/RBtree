@@ -11,10 +11,15 @@ RedBlackTree::RedBlackTree() : root(NULL) {}
 
 RedBlackTree::~RedBlackTree() {
     deleteTree(root);  
-    std::cout<< "Капитан, дерево уничтожено!";
+    std::cout<< "Дерево уничтожено!";
 }
 
-Node::Node(GroupNumber group) : group(group), color(RED), left(NULL), right(NULL), parent(NULL) {}
+Node::Node(GroupNumber group) : group(group), color(RED), left(NULL), right(NULL), parent(NULL), DuplicateList() {}
+
+
+Node* RedBlackTree::getRoot() {
+    return root;
+}
 
 void RedBlackTree::rotateLeft(Node*& root, Node*& node) {
     Node* nodeRight = node->right;
@@ -107,9 +112,14 @@ void RedBlackTree::fixInsert(Node*& root, Node*& node) {
     }
 
     root->color = BLACK;
+    
 }
 
-// Функция для получения числового значения типа программы
+bool isValidProgramType(char programType) {
+    return (programType == 'B' || programType == 'M' || programType == 'S');
+}
+
+
 int programTypeToInt(char programType) {
     if (programType == 'B')
         return 1;
@@ -121,103 +131,93 @@ int programTypeToInt(char programType) {
         return 0;  
 }
 
-Node* RedBlackTree::BSTInsert(Node* root, Node* node) {
-    if (root == NULL)
-        return node;
-    // WIP, Пока не правильная логика
-    // Сравнение по числовому значению типа программы
+
+Node* RedBlackTree::BSTInsert(Node* parent, Node* node) {
+    if (parent == NULL)
+        return node; 
+
+   
     int nodeTypeValue = programTypeToInt(node->group.programType);
-    int rootTypeValue = programTypeToInt(root->group.programType);
+    int parentTypeValue = programTypeToInt(parent->group.programType);
 
-    if (nodeTypeValue < rootTypeValue) {
-        root->left = BSTInsert(root->left, node);
-        root->left->parent = root;
-    }
-    else if (nodeTypeValue > rootTypeValue) {
-        root->right = BSTInsert(root->right, node);
-        root->right->parent = root;
-    }
-    else {
-        // Если тип программы одинаковый, сравниваем по groupID
-        if (node->group.groupID < root->group.groupID) {
-            root->left = BSTInsert(root->left, node);
-            root->left->parent = root;
-        }
-        else if (node->group.groupID > root->group.groupID) {
-            root->right = BSTInsert(root->right, node);
-            root->right->parent = root;
-        }
+    if (nodeTypeValue < parentTypeValue || 
+       (nodeTypeValue == parentTypeValue && node->group.groupID < parent->group.groupID)) {
+
+        parent->left = BSTInsert(parent->left, node);
+        parent->left->parent = parent;
+    } else {
+
+        parent->right = BSTInsert(parent->right, node);
+        parent->right->parent = parent;
     }
 
-    return root;
+    return parent;
 }
 
 
-void RedBlackTree::insert(char programType, int groupID) {
+
+void RedBlackTree::insert(char programType, int groupID, int lineNumber) {
     GroupNumber group(programType, groupID);
+    Node* currentNode = root;
+
+
+    while (currentNode != NULL) {
+        int cmp = programTypeToInt(group.programType) - programTypeToInt(currentNode->group.programType);
+
+        if (cmp == 0) {
+            cmp = groupID - currentNode->group.groupID;
+        }
+
+        if (cmp == 0) {
+            currentNode->DuplicateList.add(lineNumber);
+            return;
+        }
+
+        if (cmp < 0) {
+            if (currentNode->left == NULL) break;
+            currentNode = currentNode->left;
+        } else {
+            if (currentNode->right == NULL) break;
+            currentNode = currentNode->right;
+        }
+    }
+
     Node* node = new Node(group);
+    node->DuplicateList.add(lineNumber);
     root = BSTInsert(root, node);
     fixInsert(root, node);
 }
 
-void RedBlackTree::inOrderHelper(Node* root) {
-    if (root == NULL)
-        return;
-
-    inOrderHelper(root->left);
-
-    // Выводим тип программы
-    std::cout << root->group.programType << "-";
-
-    // Преобразуем groupID в строку и добавляем ведущие нули до 4 символов
-    std::string groupIDStr = std::to_string(root->group.groupID);
-    while (groupIDStr.length() < 4) {
-        groupIDStr = "0" + groupIDStr;
-    }
-
-    std::cout << groupIDStr << " ";
-
-    inOrderHelper(root->right);
-}
-
-void RedBlackTree::inOrder() {
-    inOrderHelper(root);
-}
-
-bool isValidProgramType(char programType) {
-    return (programType == 'B' || programType == 'M' || programType == 'S');
-}
-
 void RedBlackTree::loadFromFile(const std::string& filename) {
-
-    std::ifstream inputFile(filename);  // Используем ifstream для чтения обычных символов
+    std::ifstream inputFile(filename);
     if (!inputFile) {
         std::cerr << "Ошибка открытия файла!" << std::endl;
         return;
     }
 
     std::string line;
-    while (std::getline(inputFile, line)) {  // Считываем файл построчно
+    int lineNumber = 0;
+
+    while (std::getline(inputFile, line)) {
+        lineNumber++;
         std::istringstream iss(line);
         char programType;
         int groupID;
 
-        std::cout << "Считали строку: " << line << std::endl;  // Выводим считанную строку
-
         if (iss >> programType >> groupID) {
             if (!isValidProgramType(programType)) {
-                std::cerr << "Ошибка: Недопустимый тип программы в строке: " << line << std::endl;
+                std::cerr << "Ошибка: Недопустимый тип программы в строке: " << lineNumber << std::endl;
                 continue;
             }
 
             if (groupID < 1000 || groupID > 9999) {
-                std::cerr << "Ошибка: Номер группы должен быть четырёхзначным числом в строке: " << line << std::endl;
+                std::cerr << "Ошибка: Номер группы должен быть четырёхзначным числом в строке: " << lineNumber << std::endl;
                 continue;
             }
 
-            insert(programType, groupID);
+            insert(programType, groupID, lineNumber);
         } else {
-            std::cerr << "Ошибка чтения строки: " << line << std::endl;
+            std::cerr << "Ошибка чтения строки: " << lineNumber << std::endl;
         }
     }
 
@@ -225,14 +225,85 @@ void RedBlackTree::loadFromFile(const std::string& filename) {
 }
 
 
+void RedBlackTree::showTreeHelper(Node* root, int level) {
+    if (root == NULL)
+        return;
+
+
+    showTreeHelper(root->left, level + 1);
+
+
+    for (int i = 0; i < level; ++i) {
+        std::cout << "    ";
+    }
+
+
+    std::string color = (root->color == RED) ? "RED" : "BLACK";
+    std::cout << root->group.programType << "-";
+
+
+    std::string groupIDStr = std::to_string(root->group.groupID);
+    while (groupIDStr.length() < 4) {
+        groupIDStr = "0" + groupIDStr;
+    }
+
+    std::cout << groupIDStr << " (" << color << ") ";
+
+
+    if (!root->DuplicateList.isEmpty()) {
+        std::cout << root->DuplicateList.show() << " ";
+    }
+
+    std::cout << std::endl;
+
+
+    showTreeHelper(root->right, level + 1);
+}
+
+void RedBlackTree::showTree() {
+    std::cout << "Дерево слева-направо по уровням: " << '\n';
+    showTreeHelper(root, 0);  
+}
+
+
+void RedBlackTree::inOrderHelper(Node* root) {
+    if (root == NULL)
+        return;
+
+    inOrderHelper(root->left);
+
+    std::cout << root->group.programType << "-";
+
+
+    std::string groupIDStr = std::to_string(root->group.groupID);
+    while (groupIDStr.length() < 4) {
+        groupIDStr = "0" + groupIDStr;
+    }
+
+    std::cout << groupIDStr << " ";
+
+ 
+    if (!root->DuplicateList.isEmpty()) {
+        std::cout << root->DuplicateList.show() << "\n";
+    }
+
+    inOrderHelper(root->right);
+}
+
+
+void RedBlackTree::inOrder() {
+     std::cout << "Обход слева-направо КЧ дерева: " << '\n';
+    inOrderHelper(root);
+}
+
 
 void RedBlackTree::deleteTree(Node* node) {
     if (node == NULL)
         return;
 
-    // Рекурсивно удаляем левого и правого потомков
+
     deleteTree(node->left);
     deleteTree(node->right);
 
-    delete node;  // Удаляем текущий узел
+    delete node;
 }

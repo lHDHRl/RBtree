@@ -16,9 +16,9 @@ class linkedList {
 public:
     linkedList();
     ~linkedList();
-    
+    bool isEmpty() const;
     void add(int value);
-    void show();
+    std::string show();
     void removeAll(int value);
     int search(int x);
     void removeAfter(int value);

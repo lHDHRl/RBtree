@@ -3,3 +3,4 @@ main.exe
 main.o
 RedBlackTree.o
 src/LinkedList.o
+.vscode

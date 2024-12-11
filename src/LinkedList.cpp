@@ -14,6 +14,11 @@ linkedList::~linkedList() {
     head = last = NULL;
 }
 
+
+bool linkedList::isEmpty() const {
+    return head == NULL;
+}
+
 void linkedList::add(int x) {
     lNode* temp = new lNode{ x, NULL };
     if (!head) {
@@ -41,18 +46,25 @@ void linkedList::add(int x) {
     size++;
 }
 
-void linkedList::show() {
+std::string linkedList::show() {
     if (!head) {
-        std::cout << "Список пуст.\n";
-        return;
+        return "Список пуст.";
     }
+
+    std::string result = "[";
     lNode* temp = head;
     do {
-        std::cout << temp->value << " ";
+        result += std::to_string(temp->value);
         temp = temp->next;
+        if (temp != head) {
+            result += ", "; // Добавляем запятую с пробелом между элементами
+        }
     } while (temp != head);
-    std::cout << "\n";
+    result += "]";
+
+    return result;
 }
+
 
 void linkedList::removeAll(int x) {
     if (!head) return;
