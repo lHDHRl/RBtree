@@ -26,6 +26,7 @@ struct Node {
 
 class RedBlackTree {
 private:
+    void transplant(Node* u, Node* v);
     Node* root;
     void rotateLeft(Node*& root, Node*& node);
     void rotateRight(Node*& root, Node*& node);
@@ -33,11 +34,16 @@ private:
     Node* BSTInsert(Node* root, Node* node);
     void inOrderHelper(Node* root);
     void showTreeHelper(Node* root, int level);
+    Node* maximumNode(Node* node);
+    void deleteNode(Node* nodeToDelete);
+    void fixDeleting(Node* p);
 public:
+    ~RedBlackTree(); 
+    void deleteNodeByValue(const GroupNumber& group);
+    Node* findNode(Node* root, const GroupNumber& group);
     Node* getRoot();
     void showTree();
     void deleteTree(Node* node);  
-    ~RedBlackTree();  
     RedBlackTree();
     void insert(char programType, int groupID,int lineNumber);
     void inOrder();

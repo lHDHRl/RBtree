@@ -115,6 +115,7 @@ void RedBlackTree::fixInsert(Node*& root, Node*& node) {
     
 }
 
+
 bool isValidProgramType(char programType) {
     return (programType == 'B' || programType == 'M' || programType == 'S');
 }
@@ -129,6 +130,186 @@ int programTypeToInt(char programType) {
         return 3;
     else
         return 0;  
+}
+
+Node* RedBlackTree::findNode(Node* root, const GroupNumber& group) {
+    if (root == NULL) {
+        return NULL;
+    }
+
+    if (root->group.programType == group.programType && root->group.groupID == group.groupID) {
+        std::cout << "Найден узел: " << root->group.programType << "-" << root->group.groupID << std::endl;
+        return root;
+    }
+
+    int cmp = programTypeToInt(group.programType) - programTypeToInt(root->group.programType);
+    if (cmp == 0) {
+        cmp = group.groupID - root->group.groupID;
+    }
+
+    if (cmp < 0) {
+        return findNode(root->left, group);
+    } else {
+        return findNode(root->right, group);
+    }   
+}
+
+void RedBlackTree::fixDeleting(Node* p) {
+    while (p != root && (p == NULL || p->color == BLACK)) {
+        if (p == p->parent->left) {
+            Node* brother = p->parent->right;
+
+            if (brother != NULL && brother->color == RED) {
+                brother->color = BLACK;
+                p->parent->color = RED;
+                rotateLeft(root, p->parent);
+                brother = p->parent->right;
+            }
+
+            if ((brother->left == NULL || brother->left->color == BLACK) &&
+                (brother->right == NULL || brother->right->color == BLACK)) {
+                if (brother != NULL) brother->color = RED;
+                p = p->parent;
+            } else {
+                if (brother->right == NULL || brother->right->color == BLACK) {
+                    if (brother->left != NULL) brother->left->color = BLACK;
+                    brother->color = RED;
+                    rotateRight(root, brother);
+                    brother = p->parent->right;
+                }
+                brother->color = p->parent->color;
+                p->parent->color = BLACK;
+                if (brother->right != NULL) brother->right->color = BLACK;
+                rotateLeft(root, p->parent);
+                p = root;
+            }
+        } else {
+            Node* brother = p->parent->left;
+
+            if (brother != NULL && brother->color == RED) {
+                brother->color = BLACK;
+                p->parent->color = RED;
+                rotateRight(root, p->parent);
+                brother = p->parent->left;
+            }
+
+            if ((brother->left == NULL || brother->left->color == BLACK) &&
+                (brother->right == NULL || brother->right->color == BLACK)) {
+                if (brother != NULL) brother->color = RED;
+                p = p->parent;
+            } else {
+                if (brother->left == NULL || brother->left->color == BLACK) {
+                    if (brother->right != NULL) brother->right->color = BLACK;
+                    brother->color = RED;
+                    rotateLeft(root, brother);
+                    brother = p->parent->left;
+                }
+                brother->color = p->parent->color;
+                p->parent->color = BLACK;
+                if (brother->left != NULL) brother->left->color = BLACK;
+                rotateRight(root, p->parent);
+                p = root;
+            }
+        }
+    }
+    if (p != NULL) p->color = BLACK;
+}
+
+Node* RedBlackTree::maximumNode(Node* node) {
+    while (node->right != NULL) {
+        node = node->right;
+    }
+    return node;
+}
+
+void RedBlackTree::deleteNode(Node* nodeToDelete) {
+    Node* target = nodeToDelete;    
+    Node* replacement = NULL;       
+    Node* fixNode = NULL;           
+    bool originalColor = target->color;
+
+    if (nodeToDelete->left == NULL && nodeToDelete->right == NULL) {
+        // Случай: узел — лист
+        if (nodeToDelete == root) {
+            root = NULL; 
+        } else {
+            if (nodeToDelete == nodeToDelete->parent->left) {
+                nodeToDelete->parent->left = NULL;
+            } else {
+                nodeToDelete->parent->right = NULL;
+            }
+        }
+        fixNode = nodeToDelete->parent; 
+    } else if (nodeToDelete->left == NULL || nodeToDelete->right == NULL) {
+        // Случай: один потомок
+        replacement = (nodeToDelete->left != NULL) ? nodeToDelete->left : nodeToDelete->right;
+
+        
+        if (nodeToDelete == root) {
+            root = replacement;
+        } else if (nodeToDelete == nodeToDelete->parent->left) {
+            nodeToDelete->parent->left = replacement;
+        } else {
+            nodeToDelete->parent->right = replacement;
+        }
+
+        if (replacement != NULL) {
+            replacement->parent = nodeToDelete->parent;
+        }
+        fixNode = replacement;
+    } else {
+        // Случай: два потомка
+        Node* maxLeft = maximumNode(nodeToDelete->left); 
+        originalColor = maxLeft->color;                 
+        replacement = maxLeft->left;                   
+
+        if (maxLeft->parent == nodeToDelete) {
+            if (replacement != NULL) {
+                replacement->parent = maxLeft;
+            }
+        } else {
+            if (replacement != NULL) {
+                replacement->parent = maxLeft->parent;
+            }
+            maxLeft->parent->right = replacement;
+            maxLeft->left = nodeToDelete->left;
+            maxLeft->left->parent = maxLeft;
+        }
+
+        if (nodeToDelete == root) {
+            root = maxLeft;
+        } else if (nodeToDelete == nodeToDelete->parent->left) {
+            nodeToDelete->parent->left = maxLeft;
+        } else {
+            nodeToDelete->parent->right = maxLeft;
+        }
+
+        maxLeft->parent = nodeToDelete->parent;
+        maxLeft->right = nodeToDelete->right;
+        maxLeft->right->parent = maxLeft;
+        maxLeft->color = nodeToDelete->color;
+
+        fixNode = replacement;
+    }
+
+    delete nodeToDelete;
+
+    // Если удаляемый или замещающий узел был черным, восстанавливаем баланс
+    if (originalColor == BLACK && fixNode != NULL) {
+        fixDeleting(fixNode);
+    }
+}
+
+
+
+void RedBlackTree::deleteNodeByValue(const GroupNumber& group) {
+    Node* nodeToDelete = findNode(root, group);
+    if (nodeToDelete == NULL) {
+        std::cout << "Узел с заданным значением не найден!" << std::endl;
+        return;
+    }
+
+    deleteNode(nodeToDelete);  
 }
 
 
@@ -230,7 +411,7 @@ void RedBlackTree::showTreeHelper(Node* root, int level) {
         return;
 
 
-    showTreeHelper(root->left, level + 1);
+    showTreeHelper(root->right, level + 1);
 
 
     for (int i = 0; i < level; ++i) {
@@ -257,7 +438,7 @@ void RedBlackTree::showTreeHelper(Node* root, int level) {
     std::cout << std::endl;
 
 
-    showTreeHelper(root->right, level + 1);
+    showTreeHelper(root->left, level + 1);
 }
 
 void RedBlackTree::showTree() {

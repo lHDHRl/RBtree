@@ -3,13 +3,22 @@
 
 
 int main() {
-
     RedBlackTree tree;
+
     tree.loadFromFile("data.txt");
+
+    tree.showTree();
+
+
+
+    GroupNumber group('M', 1999);
+    tree.deleteNodeByValue(group);
+
+    
+
+
     tree.showTree();
     tree.inOrder();
-    std::cout << "Корень дерева: " << tree.getRoot()->group.programType << "-" << tree.getRoot()->group.groupID << std::endl;
     std::cout << std::endl;
-
     return 0;
 }
