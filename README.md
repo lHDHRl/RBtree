@@ -8,7 +8,7 @@
 
 
 - Права администратора для установки программ
-- Установленный [Chocolatey]([https://chocolatey.org/install])
+- Установленный [Chocolatey](https://chocolatey.org/install)
 
 
 
