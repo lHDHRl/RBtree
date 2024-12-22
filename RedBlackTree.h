@@ -26,6 +26,8 @@ struct Node {
 
 class RedBlackTree {
 private:
+
+    void inOrderToFileHelper(Node* root, std::ofstream& outputFile);
     void transplant(Node* u, Node* v);
     Node* root;
     void rotateLeft(Node*& root, Node*& node);
@@ -38,6 +40,7 @@ private:
     void deleteNode(Node* nodeToDelete);
     void fixDeleting(Node* p);
 public:
+    void inOrderToFile(const std::string& filename);
     ~RedBlackTree(); 
     void deleteNodeByValue(const GroupNumber& group);
     Node* findNode(Node* root, const GroupNumber& group);

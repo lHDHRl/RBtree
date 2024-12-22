@@ -488,3 +488,38 @@ void RedBlackTree::deleteTree(Node* node) {
 
     delete node;
 }
+
+void RedBlackTree::inOrderToFileHelper(Node* root, std::ofstream& outputFile) {
+    if (root == NULL)
+        return;
+
+    inOrderToFileHelper(root->left, outputFile);
+
+    outputFile << root->group.programType << "-";
+
+    std::string groupIDStr = std::to_string(root->group.groupID);
+    while (groupIDStr.length() < 4) {
+        groupIDStr = "0" + groupIDStr;
+    }
+
+    outputFile << groupIDStr;
+
+    if (!root->DuplicateList.isEmpty()) {
+        outputFile << " " << root->DuplicateList.show();
+    }
+    outputFile << "\n";
+
+    inOrderToFileHelper(root->right, outputFile);
+}
+
+void RedBlackTree::inOrderToFile(const std::string& filename) {
+    std::ofstream outputFile(filename);
+    if (!outputFile) {
+        std::cerr << "Ошибка открытия файла для записи!" << std::endl;
+        return;
+    }
+
+    inOrderToFileHelper(root, outputFile);
+    outputFile.close();
+    std::cout << "Обход дерева записан в файл: " << filename << std::endl;
+}

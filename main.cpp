@@ -20,5 +20,6 @@ int main() {
     tree.showTree();
     tree.inOrder();
     std::cout << std::endl;
+    tree.inOrderToFile("output.txt");
     return 0;
 }
