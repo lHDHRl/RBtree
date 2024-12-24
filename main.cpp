@@ -8,11 +8,17 @@ int main() {
     tree.loadFromFile("data.txt");
 
     tree.showTree();
-
-
-
-    GroupNumber group('M', 1999);
+    GroupNumber group('B',2000);
     tree.deleteNodeByValue(group);
+    
+    tree.showTree();
+    tree.deleteNodeByValue(GroupNumber('B',1112));
+      tree.showTree();
+    tree.deleteNodeByValue(GroupNumber('B',4000));
+
+
+
+
 
     
 

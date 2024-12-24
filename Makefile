@@ -5,7 +5,7 @@ TARGET = main
 CXX = g++
 
 # Флаги компилятора
-CXXFLAGS = -std=c++17 -Wall
+CXXFLAGS = -std=c++17 -Wall --debug
 
 # Все исходные файлы (.cpp) в проекте
 SRC = main.cpp RedBlackTree.cpp src/LinkedList.cpp

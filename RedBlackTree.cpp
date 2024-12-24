@@ -154,151 +154,191 @@ Node* RedBlackTree::findNode(Node* root, const GroupNumber& group) {
     }   
 }
 
-void RedBlackTree::fixDeleting(Node* p) {
-    while (p != root && (p == NULL || p->color == BLACK)) {
-        if (p == p->parent->left) {
-            Node* brother = p->parent->right;
+void RedBlackTree::deleteNode(Node* nodeToDelete) {
+    if (!nodeToDelete) return;
 
-            if (brother != NULL && brother->color == RED) {
-                brother->color = BLACK;
-                p->parent->color = RED;
-                rotateLeft(root, p->parent);
-                brother = p->parent->right;
-            }
+    std::cout << "Начало удаления узла: " << nodeToDelete->group.groupID << std::endl;
 
-            if ((brother->left == NULL || brother->left->color == BLACK) &&
-                (brother->right == NULL || brother->right->color == BLACK)) {
-                if (brother != NULL) brother->color = RED;
-                p = p->parent;
+    Node* replacement = nullptr;
+    Node* fixNode = nullptr;
+    Color originalColor = nodeToDelete->color;
+
+    if (nodeToDelete->left == nullptr && nodeToDelete->right == nullptr) {
+        // Узел без детей
+        std::cout << "Удаляется узел без детей." << std::endl;
+        if (nodeToDelete == root) {
+            root = nullptr;
+        } else {
+            if (nodeToDelete == nodeToDelete->parent->left) {
+                nodeToDelete->parent->left = nullptr;
+                std::cout << "Удаляем левый дочерний узел." << std::endl;
             } else {
-                if (brother->right == NULL || brother->right->color == BLACK) {
-                    if (brother->left != NULL) brother->left->color = BLACK;
-                    brother->color = RED;
-                    rotateRight(root, brother);
-                    brother = p->parent->right;
-                }
-                brother->color = p->parent->color;
-                p->parent->color = BLACK;
-                if (brother->right != NULL) brother->right->color = BLACK;
-                rotateLeft(root, p->parent);
-                p = root;
+                nodeToDelete->parent->right = nullptr;
+                std::cout << "Удаляем правый дочерний узел." << std::endl;
+            }
+        }
+        fixNode = nodeToDelete->parent;
+        replacement = nullptr;
+    } else if (nodeToDelete->left == nullptr || nodeToDelete->right == nullptr) {
+        // Узел с одним ребенком
+        std::cout << "Удаляется узел с одним ребенком." << std::endl;
+        replacement = (nodeToDelete->left != nullptr) ? nodeToDelete->left : nodeToDelete->right;
+
+        if (nodeToDelete == root) {
+            root = replacement;
+            std::cout << "Удаляемый узел был корнем, новый корень: " << root->group.groupID << std::endl;
+        } else {
+            if (nodeToDelete == nodeToDelete->parent->left) {
+                nodeToDelete->parent->left = replacement;
+                std::cout << "Заменяем левый дочерний узел." << std::endl;
+            } else {
+                nodeToDelete->parent->right = replacement;
+                std::cout << "Заменяем правый дочерний узел." << std::endl;
+            }
+        }
+
+        if (replacement) {
+            replacement->parent = nodeToDelete->parent;
+            std::cout << "Устанавливаем родителя для replacement: " << replacement->group.groupID << std::endl;
+        }
+        fixNode = replacement ? replacement : nodeToDelete->parent;
+    } else {
+        // Узел с двумя детьми
+        std::cout << "Удаляется узел с двумя детьми." << std::endl;
+        Node* predecessor = maximumNode(nodeToDelete->left);
+        std::cout << "Предшественник найден: " << predecessor->group.groupID << std::endl;
+
+
+
+        std::cout << "Данные предшественника перенесены в узел: " << nodeToDelete->group.groupID << std::endl;
+        // Вместо удаления переносим данные предшественника
+        nodeToDelete->group = predecessor->group;
+ 
+
+        // Теперь удаляем предшественника
+        if (predecessor->parent->right == predecessor) {
+            predecessor->parent->right = predecessor->left;
+            if (predecessor->left) {
+                predecessor->left->parent = predecessor->parent;
             }
         } else {
-            Node* brother = p->parent->left;
+            predecessor->parent->left = predecessor->left;
+            if (predecessor->left) {
+                predecessor->left->parent = predecessor->parent;
+            }
+        }
 
-            if (brother != NULL && brother->color == RED) {
+        fixNode = predecessor;
+        originalColor = predecessor->color;
+
+        delete predecessor;
+        std::cout << "Предшественник удален." << std::endl;
+    }
+
+    // Если удаляемый узел был черным, выполняем балансировку
+    if (originalColor == BLACK) {
+        std::cout << "Запускаем fixDeleting." << std::endl;
+        std::cout << fixNode->group.groupID << std::endl;
+        fixDeleting(fixNode);
+    }
+
+    // Убедиться, что корень черный
+    if (root != nullptr) {
+        root->color = BLACK;
+        std::cout << "Корень установлен черным: " << root->group.groupID << std::endl;
+    }
+}
+
+
+
+
+
+void RedBlackTree::fixDeleting(Node* fixNode) {
+    while (fixNode != root && (!fixNode || fixNode->color == BLACK)) {
+        if (fixNode == fixNode->parent->left) {
+            std::cout << fixNode->group.groupID << " - Левый дочерний узел родителя." << std::endl;
+            Node* brother = fixNode->parent->right;
+            std::cout << "Брат найден: " << brother->group.groupID << std::endl;
+
+            if (brother && brother->color == RED) {
+                std::cout << "Случай 1: Брат красный." << std::endl;
                 brother->color = BLACK;
-                p->parent->color = RED;
-                rotateRight(root, p->parent);
-                brother = p->parent->left;
+                fixNode->parent->color = RED;
+                rotateLeft(root, fixNode->parent);
+                brother = fixNode->parent->right;
             }
 
-            if ((brother->left == NULL || brother->left->color == BLACK) &&
-                (brother->right == NULL || brother->right->color == BLACK)) {
-                if (brother != NULL) brother->color = RED;
-                p = p->parent;
+            if ((!brother || (!brother->left || brother->left->color == BLACK)) &&
+                (!brother || (!brother->right || brother->right->color == BLACK))) {
+                std::cout << "Случай 2: Брат черный, оба ребенка черные." << std::endl;
+                if (brother) brother->color = RED;
+                fixNode = fixNode->parent;
             } else {
-                if (brother->left == NULL || brother->left->color == BLACK) {
-                    if (brother->right != NULL) brother->right->color = BLACK;
-                    brother->color = RED;
-                    rotateLeft(root, brother);
-                    brother = p->parent->left;
+                if (!brother || (!brother->right || brother->right->color == BLACK)) {
+                    std::cout << "Случай 3: Брат черный, левый ребенок красный, правый черный." << std::endl;
+                    if (brother && brother->left) brother->left->color = BLACK;
+                    if (brother) brother->color = RED;
+                    rotateRight(root, brother);
+                    brother = fixNode->parent->right;
                 }
-                brother->color = p->parent->color;
-                p->parent->color = BLACK;
-                if (brother->left != NULL) brother->left->color = BLACK;
-                rotateRight(root, p->parent);
-                p = root;
+
+                std::cout << "Случай 4: Брат черный, правый ребенок красный." << std::endl;
+                if (brother) brother->color = fixNode->parent->color;
+                fixNode->parent->color = BLACK;
+                if (brother && brother->right) brother->right->color = BLACK;
+                rotateLeft(root, fixNode->parent);
+                fixNode = root;
+            }
+        } else {
+            Node* brother = fixNode->parent->left;
+            std::cout << "Брат найден: " << brother->group.groupID << std::endl;
+
+            if (brother && brother->color == RED) {
+                std::cout << "Случай 1: Брат красный." << std::endl;
+                brother->color = BLACK;
+                fixNode->parent->color = RED;
+                rotateRight(root, fixNode->parent);
+                brother = fixNode->parent->left;
+            }
+
+            if ((!brother || (!brother->left || brother->left->color == BLACK)) &&
+                (!brother || (!brother->right || brother->right->color == BLACK))) {
+                std::cout << "Случай 2: Брат черный, оба ребенка черные." << std::endl;
+                if (brother) brother->color = RED;
+                fixNode = fixNode->parent;
+            } else {
+                if (!brother || (!brother->left || brother->left->color == BLACK)) {
+                    std::cout << "Случай 3: Брат черный, правый ребенок красный, левый черный." << std::endl;
+                    if (brother && brother->right) brother->right->color = BLACK;
+                    if (brother) brother->color = RED;
+                    rotateLeft(root, brother);
+                    brother = fixNode->parent->left;
+                }
+
+                std::cout << "Случай 4: Брат черный, левый ребенок красный." << std::endl;
+                if (brother) brother->color = fixNode->parent->color;
+                fixNode->parent->color = BLACK;
+                if (brother && brother->left) brother->left->color = BLACK;
+                rotateRight(root, fixNode->parent);
+                fixNode = root;
             }
         }
     }
-    if (p != NULL) p->color = BLACK;
+
+    if (fixNode) fixNode->color = BLACK;
+    std::cout << "Узел сбалансирован: " << fixNode->group.groupID << std::endl;
 }
 
+
+
 Node* RedBlackTree::maximumNode(Node* node) {
-    while (node->right != NULL) {
+    while (node && node->right != nullptr) {
         node = node->right;
     }
     return node;
 }
 
-void RedBlackTree::deleteNode(Node* nodeToDelete) {
-    Node* target = nodeToDelete;    
-    Node* replacement = NULL;       
-    Node* fixNode = NULL;           
-    bool originalColor = target->color;
 
-    if (nodeToDelete->left == NULL && nodeToDelete->right == NULL) {
-        // Случай: узел — лист
-        if (nodeToDelete == root) {
-            root = NULL; 
-        } else {
-            if (nodeToDelete == nodeToDelete->parent->left) {
-                nodeToDelete->parent->left = NULL;
-            } else {
-                nodeToDelete->parent->right = NULL;
-            }
-        }
-        fixNode = nodeToDelete->parent; 
-    } else if (nodeToDelete->left == NULL || nodeToDelete->right == NULL) {
-        // Случай: один потомок
-        replacement = (nodeToDelete->left != NULL) ? nodeToDelete->left : nodeToDelete->right;
-
-        
-        if (nodeToDelete == root) {
-            root = replacement;
-        } else if (nodeToDelete == nodeToDelete->parent->left) {
-            nodeToDelete->parent->left = replacement;
-        } else {
-            nodeToDelete->parent->right = replacement;
-        }
-
-        if (replacement != NULL) {
-            replacement->parent = nodeToDelete->parent;
-        }
-        fixNode = replacement;
-    } else {
-        // Случай: два потомка
-        Node* maxLeft = maximumNode(nodeToDelete->left); 
-        originalColor = maxLeft->color;                 
-        replacement = maxLeft->left;                   
-
-        if (maxLeft->parent == nodeToDelete) {
-            if (replacement != NULL) {
-                replacement->parent = maxLeft;
-            }
-        } else {
-            if (replacement != NULL) {
-                replacement->parent = maxLeft->parent;
-            }
-            maxLeft->parent->right = replacement;
-            maxLeft->left = nodeToDelete->left;
-            maxLeft->left->parent = maxLeft;
-        }
-
-        if (nodeToDelete == root) {
-            root = maxLeft;
-        } else if (nodeToDelete == nodeToDelete->parent->left) {
-            nodeToDelete->parent->left = maxLeft;
-        } else {
-            nodeToDelete->parent->right = maxLeft;
-        }
-
-        maxLeft->parent = nodeToDelete->parent;
-        maxLeft->right = nodeToDelete->right;
-        maxLeft->right->parent = maxLeft;
-        maxLeft->color = nodeToDelete->color;
-
-        fixNode = replacement;
-    }
-
-    delete nodeToDelete;
-
-    // Если удаляемый или замещающий узел был черным, восстанавливаем баланс
-    if (originalColor == BLACK && fixNode != NULL) {
-        fixDeleting(fixNode);
-    }
-}
 
 
 
