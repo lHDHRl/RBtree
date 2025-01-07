@@ -4,8 +4,9 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
+#include <optional>
 
-
+int lastLineNumber = 0;
 
 RedBlackTree::RedBlackTree() : root(NULL) {}
 
@@ -376,11 +377,12 @@ Node* RedBlackTree::BSTInsert(Node* parent, Node* node) {
 }
 
 
-
-void RedBlackTree::insert(char programType, int groupID, int lineNumber) {
+void RedBlackTree::insert(char programType, int groupID, std::optional<int> lineNumber) {
     GroupNumber group(programType, groupID);
     Node* currentNode = root;
 
+    // If lineNumber is not provided, assign the default value based on lastLineNumber
+    int resolvedLineNumber = lineNumber.value_or(lastLineNumber + 1);
 
     while (currentNode != NULL) {
         int cmp = programTypeToInt(group.programType) - programTypeToInt(currentNode->group.programType);
@@ -390,7 +392,8 @@ void RedBlackTree::insert(char programType, int groupID, int lineNumber) {
         }
 
         if (cmp == 0) {
-            currentNode->DuplicateList.add(lineNumber);
+            // Add to duplicate list if the node already exists
+            currentNode->DuplicateList.add(resolvedLineNumber);
             return;
         }
 
@@ -403,11 +406,14 @@ void RedBlackTree::insert(char programType, int groupID, int lineNumber) {
         }
     }
 
+    // Insert a new node if not found
     Node* node = new Node(group);
-    node->DuplicateList.add(lineNumber);
+    lastLineNumber = resolvedLineNumber;
+    node->DuplicateList.add(resolvedLineNumber);
     root = BSTInsert(root, node);
     fixInsert(root, node);
 }
+
 
 void RedBlackTree::loadFromFile(const std::string& filename) {
     std::ifstream inputFile(filename);

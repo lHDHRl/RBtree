@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include "src/LinkedList.h"
-
+#include <optional>
 
 enum Color { RED, BLACK };
 
@@ -26,7 +26,6 @@ struct Node {
 
 class RedBlackTree {
 private:
-
     void inOrderToFileHelper(Node* root, std::ofstream& outputFile);
     void transplant(Node* u, Node* v);
     Node* root;
@@ -48,7 +47,7 @@ public:
     void showTree();
     void deleteTree(Node* node);  
     RedBlackTree();
-    void insert(char programType, int groupID,int lineNumber);
+    void insert(char programType, int groupID, std::optional<int> lineNumber = std::nullopt);
     void inOrder();
     void loadFromFile(const std::string& filename);
 };

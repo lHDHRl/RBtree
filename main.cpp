@@ -15,14 +15,7 @@ int main() {
     tree.deleteNodeByValue(GroupNumber('B',1112));
       tree.showTree();
     tree.deleteNodeByValue(GroupNumber('B',4000));
-
-
-
-
-
-    
-
-
+    tree.insert('B', 33000);
     tree.showTree();
     tree.inOrder();
     std::cout << std::endl;
