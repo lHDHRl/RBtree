@@ -139,6 +139,30 @@ int linkedList::search(int x) {
     return -1;
 }
 
+int linkedList::removeFirst() {
+
+    // Сохраняем значение первого элемента
+    int firstValue = head->value;
+
+    // Удаляем первый элемент
+    lNode* temp = head; // Сохраняем ссылку на первый элемент
+
+    if (head == last) {
+        // Если в списке только один элемент
+        head = nullptr;
+        last = nullptr;
+    } else {
+        // Если в списке больше одного элемента
+        head = head->next;  // Перемещаем head на следующий элемент
+        last->next = head;  // Обновляем указатель last->next на новый head
+    }
+
+    delete temp; // Освобождаем память
+    size--;      // Уменьшаем размер списка
+
+    return firstValue; // Возвращаем значение удаленного элемента
+}
+
 void linkedList::removeAfter(int value) {
     if (!head) return;
 

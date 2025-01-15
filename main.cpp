@@ -4,21 +4,19 @@
 
 int main() {
     RedBlackTree tree;
-
-    tree.loadFromFile("data.txt");
-
+    tree.insert('B',10);
+    tree.insert('B',5);
+    tree.insert('B',15);
+    tree.insert('B',3);
+    tree.insert('B',7);
+    tree.insert('B',12);
+    tree.insert('B',20);
     tree.showTree();
-    GroupNumber group('B',2000);
-    tree.deleteNodeByValue(group);
-    
+    tree.deleteNodeByValue(GroupNumber('B', 10));
     tree.showTree();
-    tree.deleteNodeByValue(GroupNumber('B',1112));
-      tree.showTree();
-    tree.deleteNodeByValue(GroupNumber('B',4000));
-    tree.insert('B', 33000);
+    tree.deleteNodeByValue(GroupNumber('B', 7));
     tree.showTree();
-    tree.inOrder();
     std::cout << std::endl;
-    tree.inOrderToFile("output.txt");
+
     return 0;
 }

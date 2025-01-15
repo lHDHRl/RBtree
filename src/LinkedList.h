@@ -16,6 +16,7 @@ class linkedList {
 public:
     linkedList();
     ~linkedList();
+    int removeFirst();
     bool isEmpty() const;
     void add(int value);
     std::string show();
