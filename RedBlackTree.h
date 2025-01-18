@@ -27,7 +27,6 @@ struct Node {
 class RedBlackTree {
 private:
     void inOrderToFileHelper(Node* root, std::ofstream& outputFile);
-    void transplant(Node* u, Node* v);
     Node* root;
     void rotateLeft(Node*& root, Node*& node);
     void rotateRight(Node*& root, Node*& node);
@@ -38,6 +37,7 @@ private:
     Node* maximumNode(Node* node);
     void deleteNode(Node* nodeToDelete);
     void fixDeleting(Node* p);
+    void transplant(Node* u, Node* v);
 public:
     void inOrderToFile(const std::string& filename);
     ~RedBlackTree(); 

@@ -12,6 +12,7 @@ linkedList::~linkedList() {
     }
     delete head;
     head = last = NULL;
+    std::cout << "Список уничтожен.";
 }
 
 
